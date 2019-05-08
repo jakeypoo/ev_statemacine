@@ -4,7 +4,7 @@
 
 uint8_t evsm_queue_event( ev_state_machine_t * sm , uint8_t new_event ){
     uint8_t i; 
-    //make sure the input queue is not full
+    /* make sure the input queue is not full */
     if(sm->event_count < EVENT_QUEUE_SIZE){
         i = sm->queue_pos + sm->event_count; 
         if( i >= EVENT_QUEUE_SIZE ){
@@ -21,7 +21,7 @@ uint8_t evsm_queue_event( ev_state_machine_t * sm , uint8_t new_event ){
 uint8_t evsm_get_next_event( ev_state_machine_t * sm ){
     uint8_t next_event ;
     if(sm->event_count == 0){
-        // Input queue is empty
+        /* Input queue is empty */
         next_event = EVENT_NONE ;
     }
     else{

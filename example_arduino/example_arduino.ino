@@ -8,18 +8,26 @@
 #define TIMEOUT_MS  3000 
 uint32_t timeout_ticks ; 
 
+/** State Machine Section **/
 ev_state_machine_t sm_led ;
 
+/* define events to be processed by the state machine */
 typedef enum{
-    sm_event_none = EVENT_NONE ,
+    sm_event_none = EVENT_NONE ,    /* returned by evsm_get_next_event if the buffer is empty */
     sm_event_button_press , 
     sm_event_timeout
 } state_machine_events_t ;
 
+/* define states using handler function prototypes */
 void State_LED_Off( uint8_t event );
 void State_LED_On( uint8_t event );
 void State_LED_Blink( uint8_t event );
 
+/* Event handler for LED Off State 
+ *  [ Event ]        [ Action ]
+ * -> Button Press  : Change state to LED ON
+ * -> Timeout       : Nothing
+ */
 void State_LED_Off( uint8_t event ){
     switch( event ){
         case sm_event_button_press :
@@ -28,10 +36,16 @@ void State_LED_Off( uint8_t event ){
             sm_led.current_state = State_LED_On;        /* State Transition */
             break;
         default:
+            /* do nothing for other events */
             break;
     }
 }
 
+/* Event handler for LED On State 
+ *  [ Event ]        [ Action ]
+ * -> Button Press  : Change state to LED Blink 
+ * -> Timeout       : Change state to LED Off 
+ */
 void State_LED_On( uint8_t event ){
     switch( event ){
         case sm_event_button_press :
@@ -47,12 +61,17 @@ void State_LED_On( uint8_t event ){
     }
 }
 
+/* Event handler for Blinking LED State 
+ *  [ Event ]        [ Action ]
+ * -> Button Press  : Change state to LED Off 
+ * -> Timeout       : Change state to LED Off 
+ */
 void State_LED_Blink( uint8_t event ){
     switch( event ){
         case sm_event_button_press :
         case sm_event_timeout : 
             LED_OFF() ;
-            sm_led.current_state = State_LED_Off ;
+            sm_led.current_state = State_LED_Off ;      /* State Transition */
             break ;
         default :
             break ; 
@@ -87,6 +106,8 @@ void blink_led( void ){
 }
 
 void setup() {
+    /* initialize the state machine */
+    evsm_init( &sm_led , State_LED_Off ) ;
 
     /* initialize the LED */
     pinMode( LED_BUILTIN , OUTPUT ) ;
@@ -98,8 +119,6 @@ void setup() {
     digitalWrite( 4 , LOW ) ;   /* this is our button GND */
 
     timeout_ticks = millis() ;
-
-    evsm_init( &sm_led , State_LED_Off ) ;
 
     attachInterrupt( digitalPinToInterrupt(2) , Button_ISR , FALLING ) ;
 }
