@@ -66,7 +66,7 @@ void state_y( uint8_t event ){
 }
 
 
-void state_y( uint8_t event ){
+void state_z( uint8_t event ){
   switch( event ){
     case EVENT_1 :
       action_D() ;
